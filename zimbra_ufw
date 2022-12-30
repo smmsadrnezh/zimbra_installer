@@ -1,0 +1,4 @@
+[Zimbra]
+title=Zimbra Collaboration Server
+description=Zimbra
+ports=25,80,110,143,443,465,587,993,995,7071/tcp
