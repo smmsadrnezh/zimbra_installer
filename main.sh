@@ -39,7 +39,7 @@ echo_initial_configuration() {
 	echo_run "echo $PUBLIC_IP"
 	echo_run "echo $PRIVATE_IP"
 	echo_run "lsb_release -d"
-	echo "These ports should be open on the firewall: 22, 80, 443, 7071, 25, 110, 143, 465, 587, 993, 995"
+	echo "These ports should be open on the external firewall: 22, 80, 443, 7071, 25, 110, 143, 465, 587, 993, 995"
 	echo "Setup A records from ${MAIL_ADDR} and ${EXTRA_MAIL_ADDR} to ${PUBLIC_IP}"
 	echo "Setup MX records from ${DOMAIN_ADDR} to ${MAIL_ADDR} and TXT records"
 	echo "Check reverse dns in https://mxtoolbox.com/ReverseLookup.aspx from ${PUBLIC_IP} to ${MAIL_ADDR}"
