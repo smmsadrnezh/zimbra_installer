@@ -71,7 +71,7 @@ update_rsyslog() {
 
 update_local_dns() {
 	echo_run "hostnamectl set-hostname ${MAIL_ADDR}"
-	echo "${PRIVATE_IP} ${MAIL_ADDR} mail" >> /etc/hosts
+	echo_run 'echo "${PRIVATE_IP} ${MAIL_ADDR} mail" >> /etc/hosts'
 }
 
 install_zimbra() {
