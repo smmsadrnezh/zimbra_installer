@@ -38,6 +38,7 @@ echo_initial_configuration() {
 	echo_run "echo $EXTRA_MAIL_ADDR"
 	echo_run "echo $PUBLIC_IP"
 	echo_run "echo $PRIVATE_IP"
+	echo_run "lsb_release -d"
 	echo "Setup A records from ${MAIL_ADDR} and ${EXTRA_MAIL_ADDR} to ${PUBLIC_IP}"
 	echo "Setup MX records from ${DOMAIN_ADDR} to ${MAIL_ADDR} and TXT records"
 	echo "Check reverse dns in https://mxtoolbox.com/ReverseLookup.aspx from ${PUBLIC_IP} to ${MAIL_ADDR}"
