@@ -6,13 +6,15 @@ PRIVATE_IP=1.2.3.4
 
 # UTILITY FUNCTIONS
 
-function print_separator() {
+export TERMINAL_COLUMNS="$(stty -a 2> /dev/null | grep -Po '(?<=columns )\d+' || echo 0)"
+
+print_separator() {
     for ((i = 0; i < "$TERMINAL_COLUMNS"; i++)); do
         printf $1
     done
 }
 
-function echo_run() {
+echo_run() {
     line_count=$(wc -l <<<$1)
     echo -n ">$(if [ ! -z ${2+x} ]; then echo "($2)"; fi)_ $(sed -e '/^[[:space:]]*$/d' <<<$1 | head -1 | xargs)"
     if (($line_count > 1)); then
