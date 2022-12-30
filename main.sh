@@ -1,3 +1,4 @@
+#!/bin/bash
 DOMAIN_ADDR="example.com"
 MAIL_ADDR="mail.$DOMAIN_ADDR"
 EXTRA_MAIL_ADDR="mail.OTHERDOMAIN.COM"
