@@ -2,6 +2,7 @@
 DOMAIN_ADDR="example.com"
 MAIL_ADDR="mail.$DOMAIN_ADDR"
 EXTRA_MAIL_ADDR="mail.OTHERDOMAIN.COM"
+LIMITED_ADMIN_MAIL="user@example.com"
 PUBLIC_IP=$(curl api.ipify.org)
 PRIVATE_IP=1.2.3.4
 
@@ -135,6 +136,16 @@ final_checks(){
 	echo_run "du -sh /opt/"
 }
 
+create_a_limited_access_admin() {
+	echo_run "cp delegate-admin.sh /usr/local/bin/"
+	echo_run "chmod +x /usr/local/bin/delegate-admin.sh"
+	echo "su - zimbra"
+	echo "zmprov ma ${DOMAIN_ADDR} zimbraIsDelegatedAdminAccount TRUE zimbraAdminConsoleUIComponents accountListView zimbraAdminConsoleUIComponents downloadsView zimbraAdminConsoleUIComponents DLListView zimbraAdminConsoleUIComponents aliasListView zimbraAdminConsoleUIComponents resourceListView"
+	echo "zmprov grr global usr ${LIMITED_ADMIN_MAIL} adminLoginCalendarResourceAs"
+	echo "delegate-admin.sh ${LIMITED_ADMIN_MAIL} ${DOMAIN_ADDR}"
+	echo "exit"
+}
+
 ACTIONS=(
 	echo_initial_configuration
 	server_initial_setup
@@ -146,6 +157,7 @@ ACTIONS=(
 	install_fail2ban
 	install_firewall
 	final_checks
+	create_a_limited_access_admin
 )
 
 while true; do
