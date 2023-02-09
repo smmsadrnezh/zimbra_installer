@@ -6,6 +6,8 @@ EXTRA_MAIL_ADDR="mail.$OTHER_DOMAIN"
 LIMITED_ADMIN_MAIL="user@$DOMAIN_ADDR"
 PUBLIC_IP=$(curl api.ipify.org)
 PRIVATE_IP=1.2.3.4
+ZIMBRA8_UBUNTU22_URL="https://files.zimbra.com/downloads/8.8.15_GA/zcs-8.8.15_GA_4179.UBUNTU20_64.20211118033954.tgz"
+ZEXTRAS9_UBUNTU22_URL="download.zextras.com/zcs-9.0.0_OSE_UBUNTU20_latest-zextras.tgz"
 CRON_LINE='12 5 * * * /usr/bin/certbot renew --pre-hook "/usr/local/bin/certbot_zimbra.sh -p" --renew-hook "/usr/local/bin/certbot_zimbra.sh -r "'
 
 # UTILITY FUNCTIONS
@@ -81,7 +83,7 @@ update_local_dns() {
 install_zimbra() {
     echo_run "apt install net-tools -y"
     echo_run "cd /tmp"
-    echo_run "wget https://files.zimbra.com/downloads/8.8.15_GA/zcs-8.8.15_GA_4179.UBUNTU20_64.20211118033954.tgz"
+    echo_run "wget $ZIMBRA_UBUNTU22_DOWNLOAD"
     echo_run "tar xzvf zcs-8.8.15_GA_4179.UBUNTU20_64.20211118033954.tgz"
     echo_run "cd zcs-8.8.15_GA_4179.UBUNTU20_64.20211118033954/"
     echo_run "./install.sh"
