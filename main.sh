@@ -37,20 +37,20 @@ echo_run() {
 # ACTION FUNCTIONS
 
 echo_initial_configuration() {
-	echo_run "cat /etc/netplan/*"
-	echo_run "echo $DOMAIN_ADDR"
-	echo_run "echo $MAIL_ADDR"
-	echo_run "echo $EXTRA_MAIL_ADDR"
-	echo_run "echo $PUBLIC_IP"
-	echo_run "echo $PRIVATE_IP"
-	echo_run "lsb_release -d"
-	echo "These ports should be open on the external firewall: 22, 80, 443, 7071, 25, 110, 143, 465, 587, 993, and 995. Test it with nc -l PORT."
-	echo "Setup A records from ${MAIL_ADDR} and ${EXTRA_MAIL_ADDR} to ${PUBLIC_IP}."
-	echo "Setup MX records from ${DOMAIN_ADDR} to ${MAIL_ADDR} and TXT records."
-	echo "Check reverse DNS in https://mxtoolbox.com/ReverseLookup.aspx from ${PUBLIC_IP} to ${MAIL_ADDR}."
-	echo ""
-	echo_run "dig mx ${DOMAIN_ADDR}"
-	echo_run "dig ${MAIL_ADDR}"
+    echo_run "cat /etc/netplan/*"
+    echo_run "echo $DOMAIN_ADDR"
+    echo_run "echo $MAIL_ADDR"
+    echo_run "echo $EXTRA_MAIL_ADDR"
+    echo_run "echo $PUBLIC_IP"
+    echo_run "echo $PRIVATE_IP"
+    echo_run "lsb_release -d"
+    echo "These ports should be open on the external firewall: 22, 80, 443, 7071, 25, 110, 143, 465, 587, 993, and 995. Test it with nc -l PORT."
+    echo "Setup A records from ${MAIL_ADDR} and ${EXTRA_MAIL_ADDR} to ${PUBLIC_IP}."
+    echo "Setup MX records from ${DOMAIN_ADDR} to ${MAIL_ADDR} and TXT records."
+    echo "Check reverse DNS in https://mxtoolbox.com/ReverseLookup.aspx from ${PUBLIC_IP} to ${MAIL_ADDR}."
+    echo ""
+    echo_run "dig mx ${DOMAIN_ADDR}"
+    echo_run "dig ${MAIL_ADDR}"
 }
 
 server_initial_setup() {
@@ -64,105 +64,105 @@ server_initial_setup() {
 }
 
 update_rsyslog() {
-	echo "comment out following lines:"
-	echo 'module(load="imudp")'
-	echo 'input(type="imudp" port="514")"'
-	echo_run "nano /etc/rsyslog.conf"
-	echo_run "systemctl restart rsyslog"
-	echo_run "systemctl enable rsyslog"
+    echo "comment out following lines:"
+    echo 'module(load="imudp")'
+    echo 'input(type="imudp" port="514")"'
+    echo_run "nano /etc/rsyslog.conf"
+    echo_run "systemctl restart rsyslog"
+    echo_run "systemctl enable rsyslog"
 }
 
 update_local_dns() {
-	echo_run "hostnamectl set-hostname ${MAIL_ADDR}"
-	echo_run 'echo "${PRIVATE_IP} ${MAIL_ADDR} mail" >> /etc/hosts'
+    echo_run "hostnamectl set-hostname ${MAIL_ADDR}"
+    echo_run 'echo "${PRIVATE_IP} ${MAIL_ADDR} mail" >> /etc/hosts'
 }
 
 install_zimbra() {
-	echo_run "apt install net-tools -y"
-	echo_run "cd /tmp"
-	echo_run "wget https://files.zimbra.com/downloads/8.8.15_GA/zcs-8.8.15_GA_4179.UBUNTU20_64.20211118033954.tgz"
-	echo_run "tar xzvf zcs-8.8.15_GA_4179.UBUNTU20_64.20211118033954.tgz"
-	echo_run "cd zcs-8.8.15_GA_4179.UBUNTU20_64.20211118033954/"
-	echo_run "./install.sh"
+    echo_run "apt install net-tools -y"
+    echo_run "cd /tmp"
+    echo_run "wget https://files.zimbra.com/downloads/8.8.15_GA/zcs-8.8.15_GA_4179.UBUNTU20_64.20211118033954.tgz"
+    echo_run "tar xzvf zcs-8.8.15_GA_4179.UBUNTU20_64.20211118033954.tgz"
+    echo_run "cd zcs-8.8.15_GA_4179.UBUNTU20_64.20211118033954/"
+    echo_run "./install.sh"
 }
 
 change_zimbra_default_to_http() {
-	echo_run "su - zimbra -c 'zmprov gs $(zmhostname) zimbraReverseProxyHttpEnabled'"
-	echo_run "su - zimbra -c 'zmprov gs $(zmhostname) zimbraReverseProxyMailMode'"
-	echo_run "su - zimbra -c 'zmprov ms $(zmhostname) zimbraReverseProxyMailMode redirect'"
-	echo_run "su - zimbra -c 'zmcontrol restart'"
+    echo_run "su - zimbra -c 'zmprov gs $(zmhostname) zimbraReverseProxyHttpEnabled'"
+    echo_run "su - zimbra -c 'zmprov gs $(zmhostname) zimbraReverseProxyMailMode'"
+    echo_run "su - zimbra -c 'zmprov ms $(zmhostname) zimbraReverseProxyMailMode redirect'"
+    echo_run "su - zimbra -c 'zmcontrol restart'"
 }
 
 install_https() {
-	echo_run "wget https://raw.githubusercontent.com/YetOpen/certbot-zimbra/master/certbot_zimbra.sh -P /usr/local/bin"
-	echo_run "chmod +x /usr/local/bin/certbot_zimbra.sh"
-	echo_run "apt install telnet certbot -y"
-	echo_run "certbot_zimbra.sh --new --extra-domain ${MAIL_ADDR} --extra-domain ${EXTRA_MAIL_ADDR}"
-	echo_run "apt purge --remove certbot -y"
-	echo_run "snap install --classic certbot"
-	echo_run "ln -s /snap/bin/certbot /usr/bin/certbot"
-	echo_run 'certbot --force-renewal --preferred-chain "ISRG Root X1" renew'
-	echo_run "/usr/local/bin/certbot_zimbra.sh -d"
-	echo_run "rm -rf /usr/bin/certbot"
-	echo_run "apt purge --remove snapd -y"
-	echo_run "apt autoremove -y"
-	echo_run "rm -rf /root/snap/"
-	echo_run "systemctl daemon-reload"
-	echo_run "df -h"
-	echo_run "apt install certbot -y"
-	echo_run "(crontab -u $(whoami) -l; echo "$CRON_LINE" ) | crontab -u $(whoami) -"
+    echo_run "wget https://raw.githubusercontent.com/YetOpen/certbot-zimbra/master/certbot_zimbra.sh -P /usr/local/bin"
+    echo_run "chmod +x /usr/local/bin/certbot_zimbra.sh"
+    echo_run "apt install telnet certbot -y"
+    echo_run "certbot_zimbra.sh --new --extra-domain ${MAIL_ADDR} --extra-domain ${EXTRA_MAIL_ADDR}"
+    echo_run "apt purge --remove certbot -y"
+    echo_run "snap install --classic certbot"
+    echo_run "ln -s /snap/bin/certbot /usr/bin/certbot"
+    echo_run 'certbot --force-renewal --preferred-chain "ISRG Root X1" renew'
+    echo_run "/usr/local/bin/certbot_zimbra.sh -d"
+    echo_run "rm -rf /usr/bin/certbot"
+    echo_run "apt purge --remove snapd -y"
+    echo_run "apt autoremove -y"
+    echo_run "rm -rf /root/snap/"
+    echo_run "systemctl daemon-reload"
+    echo_run "df -h"
+    echo_run "apt install certbot -y"
+    echo_run "(crontab -u $(whoami) -l; echo "$CRON_LINE" ) | crontab -u $(whoami) -"
 }
 
 install_fail2ban() {
-	echo_run "apt install fail2ban -y"
-	echo_run "fail2ban-client status"
-	echo_run "fail2ban-client status sshd"
+    echo_run "apt install fail2ban -y"
+    echo_run "fail2ban-client status"
+    echo_run "fail2ban-client status sshd"
 }
 
 install_firewall() {
-	echo_run "cp zimbra_ufw /etc/ufw/applications.d/zimbra"
-	echo_run "ufw allow Zimbra"
-	echo_run "ufw allow ssh"
-	echo_run "ufw enable"
-	echo_run "ufw status"
+    echo_run "cp zimbra_ufw /etc/ufw/applications.d/zimbra"
+    echo_run "ufw allow Zimbra"
+    echo_run "ufw allow ssh"
+    echo_run "ufw enable"
+    echo_run "ufw status"
 }
 
 final_checks(){
-	echo_run "htop"
-	echo_run "tail -f /var/log/zimbra.log"
-	echo_run "tail -f /var/log/syslog"
-	echo_run "du -sh /opt/"
+    echo_run "htop"
+    echo_run "tail -f /var/log/zimbra.log"
+    echo_run "tail -f /var/log/syslog"
+    echo_run "du -sh /opt/"
 }
 
 create_a_limited_access_admin() {
-	echo_run "cp delegate-admin.sh /usr/local/bin/"
-	echo_run "chmod +x /usr/local/bin/delegate-admin.sh"
-	echo_run "su - zimbra -c 'zmprov ma ${DOMAIN_ADDR} zimbraIsDelegatedAdminAccount TRUE zimbraAdminConsoleUIComponents accountListView zimbraAdminConsoleUIComponents downloadsView zimbraAdminConsoleUIComponents DLListView zimbraAdminConsoleUIComponents aliasListView zimbraAdminConsoleUIComponents resourceListView'"
-	echo_run "su - zimbra -c 'zmprov grr global usr ${LIMITED_ADMIN_MAIL} adminLoginCalendarResourceAs'"
-	echo_run "su - zimbra -c 'delegate-admin.sh ${LIMITED_ADMIN_MAIL} ${DOMAIN_ADDR}'"
+    echo_run "cp delegate-admin.sh /usr/local/bin/"
+    echo_run "chmod +x /usr/local/bin/delegate-admin.sh"
+    echo_run "su - zimbra -c 'zmprov ma ${DOMAIN_ADDR} zimbraIsDelegatedAdminAccount TRUE zimbraAdminConsoleUIComponents accountListView zimbraAdminConsoleUIComponents downloadsView zimbraAdminConsoleUIComponents DLListView zimbraAdminConsoleUIComponents aliasListView zimbraAdminConsoleUIComponents resourceListView'"
+    echo_run "su - zimbra -c 'zmprov grr global usr ${LIMITED_ADMIN_MAIL} adminLoginCalendarResourceAs'"
+    echo_run "su - zimbra -c 'delegate-admin.sh ${LIMITED_ADMIN_MAIL} ${DOMAIN_ADDR}'"
 }
 
 install_zextras_theme() {
     echo_run "wget download.zextras.com/zextras-theme-installer/latest/zextras-theme-ubuntu.tgz"
-	echo_run "tar xvf zextras-theme-ubuntu.tgz"
-	echo_run "cd zextras-theme-installer && sudo ./install.sh"
-	echo_run "su - zimbra -c 'zmmailboxdctl restart'"
-	echo_rum "cd .. && rm zextras-theme-ubuntu.tgz zextras-theme-installer"
-	echo_run "su - zimbra -c 'for i in `zmprov -l gaa`; do zmprov ma ${i} zimbraAvailableSkin zextras zimbraPrefSkin zextras;done;'"
+    echo_run "tar xvf zextras-theme-ubuntu.tgz"
+    echo_run "cd zextras-theme-installer && sudo ./install.sh"
+    echo_run "su - zimbra -c 'zmmailboxdctl restart'"
+    echo_rum "cd .. && rm zextras-theme-ubuntu.tgz zextras-theme-installer"
+    echo_run "su - zimbra -c 'for i in `zmprov -l gaa`; do zmprov ma ${i} zimbraAvailableSkin zextras zimbraPrefSkin zextras;done;'"
 }
 
 ACTIONS=(
-	echo_initial_configuration
-	server_initial_setup
-	update_rsyslog
-	update_local_dns
-	install_zimbra
-	change_zimbra_default_to_http
-	install_https
-	install_fail2ban
-	install_firewall
-	final_checks
-	create_a_limited_access_admin
+    echo_initial_configuration
+    server_initial_setup
+    update_rsyslog
+    update_local_dns
+    install_zimbra
+    change_zimbra_default_to_http
+    install_https
+    install_fail2ban
+    install_firewall
+    final_checks
+    create_a_limited_access_admin
 )
 
 while true; do
