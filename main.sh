@@ -1,8 +1,9 @@
 #!/bin/bash
 DOMAIN_ADDR="example.com"
+OTHER_DOMAIN="otherexample.com"
 MAIL_ADDR="mail.$DOMAIN_ADDR"
-EXTRA_MAIL_ADDR="mail.OTHERDOMAIN.COM"
-LIMITED_ADMIN_MAIL="user@example.com"
+EXTRA_MAIL_ADDR="mail.$OTHER_DOMAIN"
+LIMITED_ADMIN_MAIL="user@$DOMAIN_ADDR"
 PUBLIC_IP=$(curl api.ipify.org)
 PRIVATE_IP=1.2.3.4
 CRON_LINE='12 5 * * * /usr/bin/certbot renew --pre-hook "/usr/local/bin/certbot_zimbra.sh -p" --renew-hook "/usr/local/bin/certbot_zimbra.sh -r "'
