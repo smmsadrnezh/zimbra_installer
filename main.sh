@@ -5,6 +5,7 @@ EXTRA_MAIL_ADDR="mail.OTHERDOMAIN.COM"
 LIMITED_ADMIN_MAIL="user@example.com"
 PUBLIC_IP=$(curl api.ipify.org)
 PRIVATE_IP=1.2.3.4
+CRON_LINE='12 5 * * * /usr/bin/certbot renew --pre-hook "/usr/local/bin/certbot_zimbra.sh -p" --renew-hook "/usr/local/bin/certbot_zimbra.sh -r "'
 
 # UTILITY FUNCTIONS
 
@@ -47,7 +48,7 @@ echo_initial_configuration() {
 	echo "Setup A records from ${MAIL_ADDR} and ${EXTRA_MAIL_ADDR} to ${PUBLIC_IP}."
 	echo "Setup MX records from ${DOMAIN_ADDR} to ${MAIL_ADDR} and TXT records."
 	echo "Check reverse DNS in https://mxtoolbox.com/ReverseLookup.aspx from ${PUBLIC_IP} to ${MAIL_ADDR}."
-	echo_run ""
+	echo ""
 	echo_run "dig mx ${DOMAIN_ADDR}"
 	echo_run "dig ${MAIL_ADDR}"
 }
@@ -86,12 +87,10 @@ install_zimbra() {
 }
 
 change_zimbra_default_to_http() {
-	echo "su - zimbra"
-	echo "zmprov gs $(zmhostname) zimbraReverseProxyHttpEnabled"
-	echo "zmprov gs $(zmhostname) zimbraReverseProxyMailMode"
-	echo "zmprov ms $(zmhostname) zimbraReverseProxyMailMode redirect"
-	echo "zmcontrol restart"
-	echo "exit"
+	echo_run "su - zimbra -c 'zmprov gs $(zmhostname) zimbraReverseProxyHttpEnabled'"
+	echo_run "su - zimbra -c 'zmprov gs $(zmhostname) zimbraReverseProxyMailMode'"
+	echo_run "su - zimbra -c 'zmprov ms $(zmhostname) zimbraReverseProxyMailMode redirect'"
+	echo_run "su - zimbra -c 'zmcontrol restart'"
 }
 
 install_https() {
@@ -111,8 +110,7 @@ install_https() {
 	echo_run "systemctl daemon-reload"
 	echo_run "df -h"
 	echo_run "apt install certbot -y"
-	echo_run "crontab -e"
-	echo '12 5 * * * /usr/bin/certbot renew --pre-hook "/usr/local/bin/certbot_zimbra.sh -p" --renew-hook "/usr/local/bin/certbot_zimbra.sh -r "'
+	echo_run "(crontab -u $(whoami) -l; echo "$CRON_LINE" ) | crontab -u $(whoami) -"
 }
 
 install_fail2ban() {
@@ -139,11 +137,18 @@ final_checks(){
 create_a_limited_access_admin() {
 	echo_run "cp delegate-admin.sh /usr/local/bin/"
 	echo_run "chmod +x /usr/local/bin/delegate-admin.sh"
-	echo "su - zimbra"
-	echo "zmprov ma ${DOMAIN_ADDR} zimbraIsDelegatedAdminAccount TRUE zimbraAdminConsoleUIComponents accountListView zimbraAdminConsoleUIComponents downloadsView zimbraAdminConsoleUIComponents DLListView zimbraAdminConsoleUIComponents aliasListView zimbraAdminConsoleUIComponents resourceListView"
-	echo "zmprov grr global usr ${LIMITED_ADMIN_MAIL} adminLoginCalendarResourceAs"
-	echo "delegate-admin.sh ${LIMITED_ADMIN_MAIL} ${DOMAIN_ADDR}"
-	echo "exit"
+	echo_run "su - zimbra -c 'zmprov ma ${DOMAIN_ADDR} zimbraIsDelegatedAdminAccount TRUE zimbraAdminConsoleUIComponents accountListView zimbraAdminConsoleUIComponents downloadsView zimbraAdminConsoleUIComponents DLListView zimbraAdminConsoleUIComponents aliasListView zimbraAdminConsoleUIComponents resourceListView'"
+	echo_run "su - zimbra -c 'zmprov grr global usr ${LIMITED_ADMIN_MAIL} adminLoginCalendarResourceAs'"
+	echo_run "su - zimbra -c 'delegate-admin.sh ${LIMITED_ADMIN_MAIL} ${DOMAIN_ADDR}'"
+}
+
+install_zextras_theme() {
+    echo_run "wget download.zextras.com/zextras-theme-installer/latest/zextras-theme-ubuntu.tgz"
+	echo_run "tar xvf zextras-theme-ubuntu.tgz"
+	echo_run "cd zextras-theme-installer && sudo ./install.sh"
+	echo_run "su - zimbra -c 'zmmailboxdctl restart'"
+	echo_rum "cd .. && rm zextras-theme-ubuntu.tgz zextras-theme-installer"
+	echo_run "su - zimbra -c 'for i in `zmprov -l gaa`; do zmprov ma ${i} zimbraAvailableSkin zextras zimbraPrefSkin zextras;done;'"
 }
 
 ACTIONS=(
