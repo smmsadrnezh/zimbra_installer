@@ -156,8 +156,10 @@ install_zextras_theme() {
 
 install_nginx_proxy() {
     echo_run "su - zimbra -c '/opt/zimbra/libexec/zmproxyconfig -e -w -o -a 60080:8080:60443:8443 -H ${MAIL_ADDR}'"
-    echo_run "apt install nginx"
-    echo_run "cp nginx.conf /etc/nginx/sites-available/default"
+    echo_run "apt install nginx -y"
+    echo_run "rm /etc/nginx/sites-{available,enabled}/default"
+    echo_run "cp {default,mail}.conf /etc/nginx/sites-available/default"
+    echo_run "ln -sf /etc/nginx/sites-available/{default.conf,mail.conf} /etc/nginx/sites-enabled"
     echo_run "nginx -t"
     echo_rum "service nginx restart"
 }
