@@ -154,6 +154,14 @@ install_zextras_theme() {
     echo_run "su - zimbra -c 'for i in `zmprov -l gaa`; do zmprov ma ${i} zimbraAvailableSkin zextras zimbraPrefSkin zextras;done;'"
 }
 
+install_nginx_proxy() {
+    echo_run "su - zimbra -c '/opt/zimbra/libexec/zmproxyconfig -e -w -o -a 60080:8080:60443:8443 -H ${MAIL_ADDR}'"
+    echo_run "apt install nginx"
+    echo_run "cp nginx.conf /etc/nginx/sites-available/default"
+    echo_run "nginx -t"
+    echo_rum "service nginx restart"
+}
+
 ACTIONS=(
     echo_initial_configuration
     server_initial_setup
@@ -166,6 +174,8 @@ ACTIONS=(
     install_firewall
     final_checks
     create_a_limited_access_admin
+    install_zextras_theme
+    install_nginx_proxy
 )
 
 while true; do
