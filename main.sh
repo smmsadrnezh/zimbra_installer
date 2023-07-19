@@ -50,7 +50,7 @@ echo_initial_configuration() {
 }
 
 update_external_firewall() {
-    echo "These ports should be open on the external firewall: 22, 80, 443, 7071, 25, 110, 143, 465, 587, 993, and 995. Test it with nc -l PORT
+    echo "These ports should be open on the external firewall: 22, 80, 443, 7071, 25, 110, 143, 465, 587, 993, and 995. Test it with nc -l PORT"
 }
 
 update_initial_dns() {
