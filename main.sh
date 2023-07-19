@@ -173,6 +173,7 @@ update_dns_dkim() {
     echo_run "su - zimbra -c '/opt/zimbra/libexec/zmdkimkeyutil -a -d ${DOMAIN_ADDR}'"
     echo_run "su - zimbra -c '/opt/zimbra/libexec/zmdkimkeyutil -a -d ${OTHER_DOMAIN}'"
     echo_run "Add a TXT record from something like EADDBE3A-2623-11EE-8762-187AF216DD7F._domainkey.${DOMAIN_ADDR} to a one-line string without double qoutes. Something like v=DKIM1; k=rsa; p=MI..."
+    echo_run "Check the configuration in https://dkimcore.org/c/keycheck"
 }
 
 ACTIONS=(
