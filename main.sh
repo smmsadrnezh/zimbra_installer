@@ -41,17 +41,22 @@ echo_run() {
 
 echo_initial_configuration() {
     echo_run "cat /etc/netplan/*"
-    echo_run "echo $DOMAIN_ADDR"
-    echo_run "echo $MAIL_ADDR"
-    echo_run "echo $EXTRA_MAIL_ADDR"
-    echo_run "echo $PUBLIC_IP"
-    echo_run "echo $PRIVATE_IP"
+    echo_run "echo DOMAIN_ADDR=$DOMAIN_ADDR"
+    echo_run "echo MAIL_ADDR=$MAIL_ADDR"
+    echo_run "echo EXTRA_MAIL_ADDR=$EXTRA_MAIL_ADDR"
+    echo_run "echo PUBLIC_IP=$PUBLIC_IP"
+    echo_run "echo PRIVATE_IP=$PRIVATE_IP"
     echo_run "lsb_release -d"
-    echo "These ports should be open on the external firewall: 22, 80, 443, 7071, 25, 110, 143, 465, 587, 993, and 995. Test it with nc -l PORT."
+}
+
+update_external_firewall() {
+    echo "These ports should be open on the external firewall: 22, 80, 443, 7071, 25, 110, 143, 465, 587, 993, and 995. Test it with nc -l PORT
+}
+
+update_initial_dns() {
     echo "Setup A records from ${MAIL_ADDR} and ${EXTRA_MAIL_ADDR} to ${PUBLIC_IP}."
     echo "Setup MX records from ${DOMAIN_ADDR} to ${MAIL_ADDR} and TXT records."
     echo "Check reverse DNS in https://mxtoolbox.com/ReverseLookup.aspx from ${PUBLIC_IP} to ${MAIL_ADDR}."
-    echo ""
     echo_run "dig mx ${DOMAIN_ADDR}"
     echo_run "dig ${MAIL_ADDR}"
 }
@@ -164,8 +169,16 @@ install_nginx_proxy() {
     echo_rum "service nginx restart"
 }
 
+update_dns_dkim() {
+    echo_run "su - zimbra -c '/opt/zimbra/libexec/zmdkimkeyutil -a -d ${DOMAIN_ADDR}'"
+    echo_run "su - zimbra -c '/opt/zimbra/libexec/zmdkimkeyutil -a -d ${OTHER_DOMAIN}'"
+    echo_run "Add a TXT record from something like EADDBE3A-2623-11EE-8762-187AF216DD7F._domainkey.${DOMAIN_ADDR} to a one-line string without double qoutes. Something like v=DKIM1; k=rsa; p=MI..."
+}
+
 ACTIONS=(
     echo_initial_configuration
+    update_external_firewall
+    update_initial_dns
     server_initial_setup
     update_rsyslog
     update_local_dns
@@ -178,6 +191,7 @@ ACTIONS=(
     create_a_limited_access_admin
     install_zextras_theme
     install_nginx_proxy
+    update_dns_dkim
 )
 
 while true; do
